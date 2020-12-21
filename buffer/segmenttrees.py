@@ -55,7 +55,7 @@ class SegmentTree():
 
     def __setitem__(self, idx:int, val:float):
         """ set value for a node in tree and update parents """
-        
+
         idx += self._capacity   
         self._value[idx] = val
         

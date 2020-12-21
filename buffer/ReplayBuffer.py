@@ -4,24 +4,18 @@
 import numpy as np
 import torch
 import random
-from segmenttrees import SumSegmentTree, MinSegmentTree
+from buffer.segmenttrees import SumSegmentTree, MinSegmentTree
 from collections import namedtuple, deque
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class ReplayBuffer():
     """ Experience Replay Buffer class """
     def __init__(self, size:int):
-        """Create Replay buffer as a list.
-        Parameters
-        ----------
-        size: int
-            Max number of transitions to store in the buffer. When the buffer
-            overflows the old memories are dropped.
-        """
+        """Create simple Replay circular buffer as a list"""
         self._buffer = []
         self._maxsize = size
         self.experience = namedtuple("Experience", field_names=["state", "action", "reward", "next_state", "done"])
-        self._next_idx = 0      # next available index is at start
+        self._next_idx = 0      # next available index for circular buffer is at start
 
     def __len__(self):
         return len(self._buffer)
@@ -29,13 +23,15 @@ class ReplayBuffer():
     def add(self, state, action, reward, next_state, done):
         """ Add a new experience to replay buffer """
         data = self.experience(state, action, reward, next_state, done)
-
-        if self._next_idx >= len(self._buffer):         # when we are still filling the buffer to capacity
+        if self._next_idx >= len(self._buffer):         
+            # when we are still filling the buffer to capacity
             self._buffer.append(data)
         else:
-            self._buffer[self._next_idx] = data         # replace data at index
-        self._next_idx = (self._next_idx + 1) % self._maxsize
-
+            # overwrite data at index
+            self._buffer[self._next_idx] = data         
+        #increment buffer index and loop to beginning when needed
+        self._next_idx = int((self._next_idx + 1) % self._maxsize)
+        
     def _encode_sample(self, idxes):
         "encode batch of experiences indexed by idxes from buffer"
         states, actions, rewards, next_states, dones = [], [], [], [],[]
@@ -51,133 +47,80 @@ class ReplayBuffer():
         next_states = torch.tensor(next_states).float().to(device)
         dones = torch.tensor(dones).float().unsqueeze(1).to(device)
         return (states, actions, rewards, next_states, dones)
-        """for i in idxes:
-            data = self._buffer[i]
-            obs_t, action, reward, obs_tp1, done = data
-            obses_t.append(np.array(obs_t, copy=False))
-            actions.append(np.array(action, copy=False))
-            rewards.append(reward)
-            obses_tp1.append(np.array(obs_tp1, copy=False))
-            dones.append(done)
-        return np.array(obses_t), np.array(actions), np.array(rewards), np.array(obses_tp1), np.array(dones) """
 
     def sample(self, batch_size):
-        """Sample a batch of experiences.
-        Parameters
-        ----------
-        batch_size: int
-            How many transitions to sample.
-        Returns
-        -------
-        obs_batch: np.array
-            batch of observations
-        act_batch: np.array
-            batch of actions executed given obs_batch
-        rew_batch: np.array
-            rewards received as results of executing act_batch
-        next_obs_batch: np.array
-            next set of observations seen after executing act_batch
-        done_mask: np.array
-            done_mask[i] = 1 if executing act_batch[i] resulted in
-            the end of an episode and 0 otherwise.
-        """
+        """Sample a random batch of experiences."""
         idxes = [random.randint(0, len(self._buffer) - 1) for _ in range(batch_size)]
         return self._encode_sample(idxes)
-
 
 class PrioritizedReplayBuffer(ReplayBuffer):
     """ A Prioritized according to TD Error replay buffer """
     def __init__(self, size: int, batch_size: int, alpha: float):
-        """
-        Parameters
-        ----------
-        size:   
-            max number of transitions to store in the buffer.When the buffer overflows the old memories are dropped.
-        batch_size:
-            size of batch to sample
-        alpha:
-            how much prioritization is used (0 - no prioritization, 1 - full prioritization)
-        """
+        """Create Prioritized(alpha=0 -> no priority) Replay circular buffer as a list"""
         super(PrioritizedReplayBuffer, self).__init__(size)
-        assert alpha >= 0
+        assert alpha >= 0, "negative alpha not allowed"
         self._alpha = alpha
         self._batch_size = batch_size
+
+        # find minimum power of 2 size for segment trees
         st_capacity = 1
         while st_capacity < size:
             st_capacity *= 2
 
-        self._st_sum = SumSegmentTree(st_capacity)  # create a cummulative sum segment tree
-        self._st_min = MinSegmentTree(st_capacity)  # create a minimum segment tree
+        self._st_sum = SumSegmentTree(st_capacity)
+        self._st_min = MinSegmentTree(st_capacity)
+        # set priority with which new experiences will be added. 1.0 means they have highest chance of being sampled
         self._max_priority = 1.0
 
     def add(self, *args, **kwargs):
         """See ReplayBuffer.store_effect"""
         idx = self._next_idx                # obtain next available index to store at from the replay buffer parent class
+
         super().add(*args, **kwargs)        # add to the replay buffer
         self._st_sum[idx] = self._max_priority ** self._alpha   # put it in the sum tree with max priority
         self._st_min[idx] = self._max_priority ** self._alpha   # put it in the min tree with max priority
 
     def _sample_proportional(self, batch_size: int):
         """ sample uniformly within `batch_size` segments """
-        res = []
+        results = []
         p_total = self._st_sum.sum(0, len(self._buffer) - 1)       # get total sum of priorites in the whole replay buffer
         every_range_len = p_total / batch_size                      # split the total sum of priorities into batch_size segments
         for i in range(batch_size):
-            mass = random.random() * every_range_len + i * every_range_len # sample randomly within this segment
-                                                                            
-            idx = self._st_sum.find_prefixsum_idx(mass)             #Find the highest index `i` in the array of sampling probabilities such that
-                                                                    # the sum of previous items <= mass
-            res.append(idx)
-        return res
+            # generate a random cummulative sum of priorites within this segment
+            mass = random.random() * every_range_len + i * every_range_len 
+            #Find index in the array of sampling probabilities such that sum of previous values is mass
+            idx = self._st_sum.find_prefixsum_idx(mass)             
+            results.append(idx)
+        return results
 
     def sample(self, batch_size:int, beta:float):
-        """ sample a batch of experiences from memory and also returns importance weights and idxes of sampled experiences
-        Parameters
-        ----------
-        batch_size: 
-            How many transitions to sample.
-        beta: 
-            To what degree to use importance weights
-            (0 - no corrections, 1 - full correction)
-        Returns
-        -------
-        tuple ([samples, weights:np.array, idxes:np.array])
-        weights: np.array
-            Array of shape (batch_size,) and dtype np.float32
-            denoting importance weight of each sampled transition
-        idxes: np.array
-            Array of shape (batch_size,) and dtype np.int32
-            idexes in buffer of sampled experiences
-        """
+        """ sample a batch of experiences from memory and also returns importance weights and idxes of sampled experiences"""
         assert beta > 0
-
         idxes = self._sample_proportional(batch_size)
-
         weights = []
         # find maximum weight factor, ie. smallest P(i) since we are dividing by this
-        p_min = self._st_min.min() / self._st_sum.sum()
+        p_sum = self._st_sum.sum()
+        p_min = self._st_min.min() / p_sum
         max_weight = (p_min * len(self._buffer)) ** (-beta)
         
         for idx in idxes:
             # Compute importance-sampling weight (w_i) and append to weights
-
             #              priority of transition
             # P(i) = -------------------------------------
             #        sum of priorities for all transitions
-
             #       |    1      |^beta
             # w_i = | --------- |
             #       |  N * P(i) |
-            
             # and then normalize by the maximum weight
             # w_j =  w_i/max_weight
-            p_sample = self._st_sum[idx] / self._st_sum.sum()
-            weight = (p_sample * len(self._buffer)) ** (-beta) 
-            weights.append(weight / max_weight)
+            p_sample = self._st_sum[idx] / p_sum
+            weight_sample = (p_sample * len(self._buffer)) ** (-beta) 
+            weights.append(weight_sample / max_weight)
+        #expand weights dimension from (batch_size,) to (batch_size,1)
+        weights_t = torch.tensor(weights).unsqueeze(1).to(device)
         
-        weights = np.array(weights)
         encoded_sample = self._encode_sample(idxes)
-        return tuple(list(encoded_sample) + [weights, idxes])
+        return tuple(list(encoded_sample) + [weights_t, idxes])
 
     def update_priorities(self, idxes, priorities):
         """Update priorities of sampled transitions.
