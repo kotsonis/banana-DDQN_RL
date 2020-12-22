@@ -12,13 +12,16 @@ In reinforcement learning, an agent interacts with an environment in order to le
 
 ![Agent Environment](./images/agent_environment.png)
 
-In order to experiment and learn, the agent chooses it's next action stochasticaly, and not just by selecting the next action based on highest expected reward. Specifically, the agent asigns a probability to be chosen to all other actions too so that it can explore alternative routes to reward. This functionality is implemented here through an $\epsilon$ -greedy algorithm, which initially explores alternatives at a high rate (hyper parameter `eps_start`) of 95% and linearly decays this to a minimum exploration of 1% (hyper parameter `eps_end`) with a rate of `eps_decay` per episode.
+In order to experiment and learn, the agent chooses it's next action stochasticaly, and not just by selecting the next action based on highest expected reward. Specifically, the agent asigns a probability to be chosen to all other actions too so that it can explore alternative routes to reward. This functionality is implemented here through an epsilon-greedy algorithm, which initially explores alternatives at a high rate (hyper parameter `eps_start`) of 95% and linearly decays this to a minimum exploration of 1% (hyper parameter `eps_end`) with a rate of `eps_decay` per episode.
 
 ### Q function approximator
 This project implements a dueling Q network for the Q function approximator, as detailed in  [Dueling Network Architectures for Deep Reinforcement Learning, 2015, Wang et al.](https://arxiv.org/abs/1511.06581)
 
+
 Learning is performed through gradient descent. and at each step the loss and gradient that are computed are:
 $$Loss_i = 
+<a href="https://www.codecogs.com/eqnedit.php?latex=\delta_j=R_j&plus;\gamma_jQ_{\text{target}}\left(S_j,&space;\arg\max_a&space;Q(S_j,&space;a)\right)-Q(S_{j-1},&space;A_{j-1})" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\delta_j=R_j&plus;\gamma_jQ_{\text{target}}\left(S_j,&space;\arg\max_a&space;Q(S_j,&space;a)\right)-Q(S_{j-1},&space;A_{j-1})" title="\delta_j=R_j+\gamma_jQ_{\text{target}}\left(S_j, \arg\max_a Q(S_j, a)\right)-Q(S_{j-1}, A_{j-1})" /></a>
+
 ### Double Q Learning
 This project implements a double Q learning solution
 $$P(i) = \frac{p_i^{\alpha}}{\sum_k p_k^{\alpha}}$$

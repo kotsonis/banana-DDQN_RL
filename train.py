@@ -11,36 +11,8 @@ import matplotlib.image  as mpimg
 from collections import deque
 from unityagents import UnityEnvironment
 from agent.DDQN import DDQNPrioritizedAgent
-
-std_learn_params = {
-        # Unity Environment parameters
-        "banana_location": "./Banana_Windows_x86_64/Banana.exe",
-        # MDP learning parameters
-        "n_episodes": 2000, # maximum episodes to train on
-        "max_t":1000,       # maximum scenes in an episodic training
-        "eps_start":1.0,    # starting exploration factor
-        "eps_end":0.01,     # ending exploration factor
-        "eps_decay":0.98,   # eps step decay
-        'early_stop': 13,   # early stop if average reward in 100 episode reaches this value
-        
-        # Q value learning parameters
-        "gamma": 0.99,      # discount factor
-        "tau": 5e-4,        # for soft update of target parameters
-        "lr": 5e-4,         # learning rate 
-        "update_every": 4,  # how often to update the network
-        
-        # Replay Buffer / Prioritized Replay Buffer parameters
-        "buffer_size": 1e5,         # replay buffer size
-        "batch_size": 64,           # minibatch size
-        "alpha": 0.6,               # prioritization factor (0: No prioritization .. 1: Full prioritization)
-        "pr_eps": 1e-05,            # minimum prioritization
-        "beta":0.4,                 # Importance sampling beta factor start
-        "beta_step": 0.00025/4.0,   # beta decay factor
-        "beta_max": 1.0             # maximum beta
-    }
-def moving_average(x, w):
-    vals = np.array(x)
-    return np.convolve(vals, np.ones(w), 'valid') / w
+from hyperparams import std_learn_params
+from utils import parse_params, moving_average
 
 def train_dqn(env, learn_dict, agent, log_results=True):
     """Deep Q-Learning.
@@ -89,106 +61,6 @@ def train_dqn(env, learn_dict, agent, log_results=True):
             if log_results: print('\nEnvironment solved in {:d} episodes!\tAverage Score: {:.2f}'.format(i_episode-100, np.mean(scores_window)))
             break
     return scores
-
-def m_a_scores(window_size, raw_scores):
-    ma_scores = []
-    ma_scores.append(0.)
-    avg_window = window_size
-    beta = 1.0 - (1./avg_window)
-    for i in range(1, len(raw_scores)):
-        ma_scores.append(
-            beta*ma_scores[i-1]+(1-beta)*raw_scores[i])
-    return ma_scores
-
-def usage():
-    print(
-        "trainer.py - train the agent to solve the Banana environment\n",
-        "optional parameters: \n",
-        "--------------------- Unity Environment -------------------\n",
-        "-- banana_location <location of banana environment>\n",
-        "\n",
-        "---------------- Agent training parameters ----------------\n",
-        "--eps-start <starting value of exploration>                default: 1.0\n",
-        "--eps-decay <eps linear decay rate>                        default: 0.98\n",
-        "--episodes <number of episodes to train on>                default: 2000\n",
-        "--reward-early-stop <average reward/100 episodes>          default: 13\n",
-        "\n",
-        "-------------- Q Network learning parameters ---------------\n",
-        "--tau <Q network soft update factor>                       defalut: 5e-4\n"
-        "--gamma <factor to diminish future rewards>                default: 0.99\n",
-        "\n",
-        "--------- Prioritized Experience Replay parameters --------\n",
-        "--batch-size <mini batch size>                             default: 64\n",
-        "--beta_start <beta factor for IS weights>                  default: 0.4\n",
-        "--beta-decay <linear decay factor>                         default: 6.25e-6\n",
-        "--alpha <level of prioritization>                          default: 0.6\n",
-        "\n",
-        "--------------- storing outputs parameters ---------------\n",
-        "--output-param-file <fname to save Q_function model>       default: none\n",
-        "--output-image <png fname to save training scores plot>    default: none\n",
-    )
-
-def parse_params(argv):
-    try:
-        opts, args = getopt.getopt(argv,
-                                   ":bh",
-                                   [
-                                       "eps-start=",
-                                       "eps-decay=",
-                                       "batch-size=",
-                                       "episodes=",
-                                       "reward-early-stop=",
-                                       "output-param-file=",
-                                       "output-image=",
-                                       "gamma=",
-                                       "tau=",
-                                       "beta_start=",
-                                       "beta-decay=",
-                                       "alpha=",
-                                       "banana_location=",
-                                       "help"
-                                    ])
-    except getopt.GetoptError as err:
-        # print help information and exit:
-        print(err)  # will print something like "option -a not recognized"
-        usage()
-        sys.exit(2)
-    hyperparams = std_learn_params
-
-    for o, a in opts:
-        if o == "--eps-start":
-            hyperparams['eps_start'] = float(a)
-        elif o == "--eps-decay":
-            hyperparams['eps_decay'] = float(a)
-        elif o == "--batch-size":
-            hyperparams['batch_size'] = int(a)
-        elif o == "--episodes":
-            hyperparams['n_episodes']= int(a)
-        elif o == "--reward-early-stop":
-            hyperparams['early_stop'] = float(a)
-        elif o == "--tau":
-            hyperparams['tau'] = float(a)
-        elif o == "--output-param-file":
-            hyperparams['model_file'] = a
-        elif o == "--output-image":
-            hyperparams['plt_file'] = a
-        elif o == "--gamma":
-            hyperparams['gamma'] = float(a)
-        elif o == "--beta-start":
-            hyperparams['beta']=float(a)
-        elif o == "--beta-decay":
-            hyperparams['beta_decay']=float(a)
-        elif o == "--alpha":
-            hyperparams['alpha'] = float(a)
-        elif o in ("-b", "--banana_location"):
-            hyperparams['banana_location']=a
-        elif o == "--help":
-            usage()
-            sys.exit(2)
-        else:
-            assert False, "unhandled option"
-    # return the modified hyperparams
-    return hyperparams  
 
 def main(argv):
     learn_env = parse_params(argv)

@@ -14,25 +14,26 @@ class dueling_QNetwork(nn.Module):
         """
         super(dueling_QNetwork, self).__init__()
         #self.seed = torch.manual_seed()
-        self.hidden_fc = nn.Linear(state_size, 64)
-        self.value_fc_hidden = nn.Linear(64,64)
-        self.value_fc = nn.Linear(64, 1)
-        self.advantage_fc_hidden1 = nn.Linear(64,64)
-        self.advantage_fc_hidden2 = nn.Linear(64,64)
-        self.advantage_fc = nn.Linear(64, action_size)
+        self.hidden_fc = nn.Linear(state_size, 128)
+        #self.value_fc_hidden = nn.Linear(128,64)
+        self.value_fc = nn.Linear(128, 1)
+        #self.advantage_fc_hidden1 = nn.Linear(64,64)
+        #self.advantage_fc_hidden2 = nn.Linear(64,64)
+        self.advantage_fc = nn.Linear(128, action_size)
 
 
     def forward(self, state):
         """Build a network that maps state -> action values."""
         x = F.relu(self.hidden_fc(state))
-        value = F.relu(self.value_fc_hidden(x))
-        value = self.value_fc(value)
-        advantage = F.relu(self.advantage_fc_hidden1(x))
-        advantage = F.relu(self.advantage_fc_hidden2(advantage))
-        advantage = self.advantage_fc(advantage)
+        #value = F.relu(self.value_fc_hidden(x))
+        value = self.value_fc(x)
+        #advantage = F.relu(self.advantage_fc_hidden1(x))
+        #advantage = F.relu(self.advantage_fc_hidden2(advantage))
+        advantage = self.advantage_fc(x)
+        delta_advantage = advantage - advantage.mean()
         expanded_value = value.expand_as(advantage)
-        max_advantage = advantage.max(1)[0].unsqueeze(-1)
-        delta_advantage = advantage - max_advantage
+        #max_advantage = advantage.max(1)[0].unsqueeze(-1)
+        #delta_advantage = advantage - max_advantage
         q_out = expanded_value - delta_advantage
         return q_out
     
