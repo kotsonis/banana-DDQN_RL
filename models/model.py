@@ -17,7 +17,8 @@ class dueling_QNetwork(nn.Module):
         self.hidden_fc = nn.Linear(state_size, 64)
         self.value_fc_hidden = nn.Linear(64,64)
         self.value_fc = nn.Linear(64, 1)
-        self.advantage_fc_hidden = nn.Linear(64,64)
+        self.advantage_fc_hidden1 = nn.Linear(64,64)
+        self.advantage_fc_hidden2 = nn.Linear(64,64)
         self.advantage_fc = nn.Linear(64, action_size)
 
 
@@ -26,7 +27,8 @@ class dueling_QNetwork(nn.Module):
         x = F.relu(self.hidden_fc(state))
         value = F.relu(self.value_fc_hidden(x))
         value = self.value_fc(value)
-        advantage = F.relu(self.advantage_fc_hidden(x))
+        advantage = F.relu(self.advantage_fc_hidden1(x))
+        advantage = F.relu(self.advantage_fc_hidden2(advantage))
         advantage = self.advantage_fc(advantage)
         expanded_value = value.expand_as(advantage)
         max_advantage = advantage.max(1)[0].unsqueeze(-1)
