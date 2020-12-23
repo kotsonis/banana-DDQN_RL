@@ -29,26 +29,27 @@ An episode completes after 300 actions
 ### Getting Started
 To set up your python environment and run the code in this repository, follow the instructions below.
 #### setup Conda Python environment
+
 Create (and activate) a new environment with Python 3.6.
 
 	- __Linux__ or __Mac__: 
-	```shell
+```shell
 	conda create --name banrl python=3.6
 	source activate banrl
-	```
+```
 	- __Windows__: 
-	```bash
+```bash
 	conda create --name banrl python=3.6 
 	activate banrl
-	```
+```
 #### Download repository
  Clone the repository and install dependencies
 
-	```shell
+```shell
 	git clone https://github.com/kotsonis/banana-DDQN_RL.git
 	cd banana-DDQN-RL
 	pip install -r requirements.txt
-	```
+```
 
 #### Install Banana game environment
 
