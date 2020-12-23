@@ -32,7 +32,7 @@ To set up your python environment and run the code in this repository, follow th
 Create (and activate) a new environment with Python 3.6.
 
 	- __Linux__ or __Mac__: 
-	```bash
+	```shell
 	conda create --name banrl python=3.6
 	source activate banrl
 	```
@@ -44,7 +44,7 @@ Create (and activate) a new environment with Python 3.6.
 #### Download repository
  Clone the repository and install dependencies
 
-	```bash
+	```shell
 	git clone https://github.com/kotsonis/banana-DDQN_RL.git
 	cd banana-DDQN-RL
 	pip install -r requirements.txt
