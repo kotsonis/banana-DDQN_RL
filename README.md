@@ -32,12 +32,12 @@ To set up your python environment and run the code in this repository, follow th
 
 Create (and activate) a new environment with Python 3.6.
 
-	- __Linux__ or __Mac__: 
+- __Linux__ or __Mac__: 
 ```shell
 	conda create --name banrl python=3.6
 	source activate banrl
 ```
-	- __Windows__: 
+- __Windows__: 
 ```bash
 	conda create --name banrl python=3.6 
 	activate banrl
@@ -61,7 +61,7 @@ Create (and activate) a new environment with Python 3.6.
 
 2. Place the file in the `banana-DDQN-RL` folder, and unzip (or decompress) the file.
 
-3. edit (.\hyperparams.py) to and set the `banana_location` entry to point to the right location. Example :
+3. edit [hyperparams.py](hyperparams.py) to and set the `banana_location` entry to point to the right location. Example :
 ```python 
 std_learn_params = {
         # Unity Environment parameters
