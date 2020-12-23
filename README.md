@@ -26,9 +26,9 @@ Four discrete actions are available, corresponding to:
 ##### Turns
 An episode completes after 300 actions
 
-### Getting Started
+## Getting Started
 To set up your python environment and run the code in this repository, follow the instructions below.
-#### setup Conda Python environment
+### setup Conda Python environment
 
 Create (and activate) a new environment with Python 3.6.
 
@@ -42,7 +42,7 @@ Create (and activate) a new environment with Python 3.6.
 	conda create --name banrl python=3.6 
 	activate banrl
 ```
-#### Download repository
+### Download repository
  Clone the repository and install dependencies
 
 ```shell
@@ -51,7 +51,7 @@ Create (and activate) a new environment with Python 3.6.
 	pip install -r requirements.txt
 ```
 
-#### Install Banana game environment
+### Install Banana game environment
 
 1. Download the game environment from one of the links below.  You need only select the environment that matches your operating system:
     - Linux: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/Banana_Linux.zip)
@@ -66,4 +66,19 @@ Create (and activate) a new environment with Python 3.6.
 std_learn_params = {
         # Unity Environment parameters
         "banana_location": "./Banana_Windows_x86_64/Banana.exe",
+```
+## Instructions
+### Training
+To train an agent, [train.py](train.py) reads the hyperparameters from [hyperparams.py](hyperparams.py) and accepts command line options to modify parameters and/or set saving options.You can get the CLI options by running
+```bash
+python train.py -h
+```
+### Playing with a trained model
+you can see the agent playing with the trained model as follows:
+```bash
+python play.py
+```
+You can also specify the number of episodes you want the agent to play, as well as the non-default trained model as follows:
+```bash
+python play.py --episodes 20 --model v2_model.pt
 ```

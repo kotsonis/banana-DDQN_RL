@@ -19,51 +19,16 @@ This project implements a dueling Q network for the Q function approximator, as 
 
 
 Learning is performed through gradient descent. and at each step the loss and gradient that are computed are:
-$$Loss_i = 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\delta_j=R_j&plus;\gamma_jQ_{\text{target}}\left(S_j,&space;\arg\max_a&space;Q(S_j,&space;a)\right)-Q(S_{j-1},&space;A_{j-1})" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\delta_j=R_j&plus;\gamma_jQ_{\text{target}}\left(S_j,&space;\arg\max_a&space;Q(S_j,&space;a)\right)-Q(S_{j-1},&space;A_{j-1})" title="\delta_j=R_j+\gamma_jQ_{\text{target}}\left(S_j, \arg\max_a Q(S_j, a)\right)-Q(S_{j-1}, A_{j-1})" /></a>
 
 ### Double Q Learning
 This project implements a double Q learning solution
-$$P(i) = \frac{p_i^{\alpha}}{\sum_k p_k^{\alpha}}$$
-where $p_i > 0$ is the priority of transition $i$.
-$$P(i) = \frac{p_i^{\alpha}}{\sum_k p_k^{\alpha}}$$
-$$w_i = \left(\frac{1}{N} \cdot \frac{1}{P(i)}\right)^{\beta}$$
-```math
-f(x) = \int_{-\infty}^\infty
-    \hat f(\xi)\,e^{2 \pi i \xi x}
-    \,d\xi
-```
+
 # Algorithm 1
 see Prioritized Experience Replay (https://arxiv.org/pdf/1511.05952.pdf)
-Just a sample algorithmn
-$$\begin{algorithm}[H]\DontPrintSemicolon\SetAlgoLined\KwResult{Write here the result}\SetKwInOut{Input}{Input}\SetKwInOut{Output}{Output}\Input{Write here the input}\Output{Write here the output}\BlankLine\While{While condition}{    instructions\;    \eIf{condition}{        instructions1\;        instructions2\;    }{
-        instructions3\;    }}\caption{While loop with If/Else condition}\end{algorithm}$$
+The algorithm that is implemented is given below:
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{align*}&space;&{[1]\bold{Input:}&space;\text{minibatch}\,&space;k,&space;\text{step-size}&space;\,\tau,\eta,\,&space;\text{replay&space;period}&space;\,K&space;\text{and&space;size}\,&space;N,\text{exponents}&space;\,\alpha\,&space;\text{and}\,&space;\beta,&space;\text{episodes}\,&space;T.}\\&space;&{[2]\text{Initialize&space;replay&space;memory}\,&space;\mathcal{H}=\emptyset,&space;\Delta&space;=&space;0,&space;p_1=1}\\&space;&{[3]Initialize\,&space;two\,&space;Q\,&space;networks,&space;Q_{local}(s,a;\theta_{local})\,&space;and&space;Q_{target}(s,a;\theta_{target})}\\&space;&{[4]Observe&space;\,&space;S_0&space;\,&space;and\,&space;choose\,&space;A_0&space;\sim&space;\pi_{\theta_{local}}(S_0)}\\&space;&{[5]\bold{for}\,&space;t=1&space;\,&space;\bold{to}&space;\,&space;T&space;\,&space;\bold{do}}\\&space;&{[6]\quad&space;\text{Observe}\,&space;S_t,R_t}\\&space;&{[7]\quad&space;\text{Store&space;transition}\,&space;S_{t-1},A_{t-1},R_t,&space;S_t\,&space;in&space;\mathcal{H}&space;\,&space;\text{with&space;maximal&space;transition&space;priority}\,&space;p_t&space;=&space;1}\\&space;&{[8]\quad&space;\bold{if}&space;\,&space;t\,&space;\bold{mod}&space;\,K==0\,&space;\bold{then}}\\&space;&{[9]\quad\quad\bold{for&space;}j=1\,&space;\bold{to&space;}\,&space;k&space;\,\bold{&space;do}}\\&space;&{[10]\quad&space;\quad\quad&space;\text{Sample}\,&space;k\,&space;\text{transitions&space;from}\,&space;\mathcal{H}\,&space;j&space;\sim&space;P(j)&space;=&space;\frac{{p_j}^a}{\sum_i{{p_i}^a}}}\\&space;\end{}" target="_blank"><img src="https://latex.codecogs.com/png.latex?\begin{align*}&space;&{[1]\bold{Input:}&space;\text{minibatch}\,&space;k,&space;\text{step-size}&space;\,\tau,\eta,\,&space;\text{replay&space;period}&space;\,K&space;\text{and&space;size}\,&space;N,\text{exponents}&space;\,\alpha\,&space;\text{and}\,&space;\beta,&space;\text{episodes}\,&space;T.}\\&space;&{[2]\text{Initialize&space;replay&space;memory}\,&space;\mathcal{H}=\emptyset,&space;\Delta&space;=&space;0,&space;p_1=1}\\&space;&{[3]Initialize\,&space;two\,&space;Q\,&space;networks,&space;Q_{local}(s,a;\theta_{local})\,&space;and&space;Q_{target}(s,a;\theta_{target})}\\&space;&{[4]Observe&space;\,&space;S_0&space;\,&space;and\,&space;choose\,&space;A_0&space;\sim&space;\pi_{\theta_{local}}(S_0)}\\&space;&{[5]\bold{for}\,&space;t=1&space;\,&space;\bold{to}&space;\,&space;T&space;\,&space;\bold{do}}\\&space;&{[6]\quad&space;\text{Observe}\,&space;S_t,R_t}\\&space;&{[7]\quad&space;\text{Store&space;transition}\,&space;S_{t-1},A_{t-1},R_t,&space;S_t\,&space;in&space;\mathcal{H}&space;\,&space;\text{with&space;maximal&space;transition&space;priority}\,&space;p_t&space;=&space;1}\\&space;&{[8]\quad&space;\bold{if}&space;\,&space;t\,&space;\bold{mod}&space;\,K==0\,&space;\bold{then}}\\&space;&{[9]\quad\quad\bold{for&space;}j=1\,&space;\bold{to&space;}\,&space;k&space;\,\bold{&space;do}}\\&space;&{[10]\quad&space;\quad\quad&space;\text{Sample}\,&space;k\,&space;\text{transitions&space;from}\,&space;\mathcal{H}\,&space;j&space;\sim&space;P(j)&space;=&space;\frac{{p_j}^a}{\sum_i{{p_i}^a}}}\\&space;\end{}" title="\begin{align*} &{[1]\bold{Input:} \text{minibatch}\, k, \text{step-size} \,\tau,\eta,\, \text{replay period} \,K \text{and size}\, N,\text{exponents} \,\alpha\, \text{and}\, \beta, \text{episodes}\, T.}\\ &{[2]\text{Initialize replay memory}\, \mathcal{H}=\emptyset, \Delta = 0, p_1=1}\\ &{[3]Initialize\, two\, Q\, networks, Q_{local}(s,a;\theta_{local})\, and Q_{target}(s,a;\theta_{target})}\\ &{[4]Observe \, S_0 \, and\, choose\, A_0 \sim \pi_{\theta_{local}}(S_0)}\\ &{[5]\bold{for}\, t=1 \, \bold{to} \, T \, \bold{do}}\\ &{[6]\quad \text{Observe}\, S_t,R_t}\\ &{[7]\quad \text{Store transition}\, S_{t-1},A_{t-1},R_t, S_t\, in \mathcal{H} \, \text{with maximal transition priority}\, p_t = 1}\\ &{[8]\quad \bold{if} \, t\, \bold{mod} \,K==0\, \bold{then}}\\ &{[9]\quad\quad\bold{for }j=1\, \bold{to }\, k \,\bold{ do}}\\ &{[10]\quad \quad\quad \text{Sample}\, k\, \text{transitions from}\, \mathcal{H}\, j \sim P(j) = \frac{{p_j}^a}{\sum_i{{p_i}^a}}}\\ \end{}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{align*}&space;&{[11]\quad\quad\quad\text{Compute&space;importance-sampling&space;weights}\,w_j=\frac{({N*P(j)})^{-b}}{\max_iw_i}}\\&space;&{[12]\quad\quad\quad\text{Compute&space;TD-error}\,&space;\delta_j=R_j&plus;\gamma&space;Q_{target}(S_j,\text{arg}\max_a{Q_{local}(S_j,a)})-Q_{local}(S_{j-1},A_{j-1}}\\&space;&{[13]\quad\quad\quad\text{update&space;transition&space;priority}\,&space;p_j\leftarrow&space;\left&space;|&space;\delta_j&space;\right&space;|}\\&space;&{[14]\quad\quad\quad\text{Accumulate&space;weight-change}\,&space;\Delta&space;\leftarrow&space;\Delta&space;&plus;&space;w_j&space;*&space;\delta_j*\nabla_{\theta}Q(S_{j-1},&space;A_{j-1})}\\&space;&{[15]\quad\quad\bold{end\,&space;for}}\\&space;&{[16]\quad\quad&space;\text{Update&space;weights}\,&space;\theta\leftarrow\theta&plus;\eta*\Delta&space;\,,\text{reset}\,\Delta}\\&space;&{[17]\quad\quad&space;\text{Transfer&space;}Q_{local}&space;\text{&space;values&space;to&space;}&space;Q_{target}\Rightarrow&space;\theta_{target}\leftarrow\tau\theta_{target}&plus;(1-\tau)\theta_{local}}\\&space;&{[18]\quad\bold{end&space;\,&space;if}}\\&space;&{[19]\quad\text{Choose&space;action&space;}A_t\sim\pi_\theta(S_t)}\\&space;&{[20]\bold{end&space;\,&space;for}}&space;\end{}" target="_blank"><img src="https://latex.codecogs.com/png.latex?\begin{align*}&space;&{[11]\quad\quad\quad\text{Compute&space;importance-sampling&space;weights}\,w_j=\frac{({N*P(j)})^{-b}}{\max_iw_i}}\\&space;&{[12]\quad\quad\quad\text{Compute&space;TD-error}\,&space;\delta_j=R_j&plus;\gamma&space;Q_{target}(S_j,\text{arg}\max_a{Q_{local}(S_j,a)})-Q_{local}(S_{j-1},A_{j-1}}\\&space;&{[13]\quad\quad\quad\text{update&space;transition&space;priority}\,&space;p_j\leftarrow&space;\left&space;|&space;\delta_j&space;\right&space;|}\\&space;&{[14]\quad\quad\quad\text{Accumulate&space;weight-change}\,&space;\Delta&space;\leftarrow&space;\Delta&space;&plus;&space;w_j&space;*&space;\delta_j*\nabla_{\theta}Q(S_{j-1},&space;A_{j-1})}\\&space;&{[15]\quad\quad\bold{end\,&space;for}}\\&space;&{[16]\quad\quad&space;\text{Update&space;weights}\,&space;\theta\leftarrow\theta&plus;\eta*\Delta&space;\,,\text{reset}\,\Delta}\\&space;&{[17]\quad\quad&space;\text{Transfer&space;}Q_{local}&space;\text{&space;values&space;to&space;}&space;Q_{target}\Rightarrow&space;\theta_{target}\leftarrow\tau\theta_{target}&plus;(1-\tau)\theta_{local}}\\&space;&{[18]\quad\bold{end&space;\,&space;if}}\\&space;&{[19]\quad\text{Choose&space;action&space;}A_t\sim\pi_\theta(S_t)}\\&space;&{[20]\bold{end&space;\,&space;for}}&space;\end{}" title="\begin{align*} &{[11]\quad\quad\quad\text{Compute importance-sampling weights}\,w_j=\frac{({N*P(j)})^{-b}}{\max_iw_i}}\\ &{[12]\quad\quad\quad\text{Compute TD-error}\, \delta_j=R_j+\gamma Q_{target}(S_j,\text{arg}\max_a{Q_{local}(S_j,a)})-Q_{local}(S_{j-1},A_{j-1}}\\ &{[13]\quad\quad\quad\text{update transition priority}\, p_j\leftarrow \left | \delta_j \right |}\\ &{[14]\quad\quad\quad\text{Accumulate weight-change}\, \Delta \leftarrow \Delta + w_j * \delta_j*\nabla_{\theta}Q(S_{j-1}, A_{j-1})}\\ &{[15]\quad\quad\bold{end\, for}}\\ &{[16]\quad\quad \text{Update weights}\, \theta\leftarrow\theta+\eta*\Delta \,,\text{reset}\,\Delta}\\ &{[17]\quad\quad \text{Transfer }Q_{local} \text{ values to } Q_{target}\Rightarrow \theta_{target}\leftarrow\tau\theta_{target}+(1-\tau)\theta_{local}}\\ &{[18]\quad\bold{end \, if}}\\ &{[19]\quad\text{Choose action }A_t\sim\pi_\theta(S_t)}\\ &{[20]\bold{end \, for}} \end{}" /></a>
 
-\begin{algorithm}[tb]
-   \caption{Double DQN with proportional prioritization}
-   \label{alg-preplay}
-\begin{algorithmic}[1]
-   \STATE {\bfseries Input:} minibatch $k$, step-size $\eta$, replay period $K$ and size $N$, exponents $\alpha$ and $\beta$, budget $T$.
-   \STATE Initialize replay memory $\mathcal{H}=\emptyset$, $\Delta = 0$, $p_1=1$
-   \STATE Observe $S_0$ and choose $A_0 \sim \pi_{\theta}(S_0)$
-   \FOR{$t=1$ {\bfseries to} $T$}
-   	  \STATE Observe $S_t, R_t, \gamma_t$
-      \STATE Store transition $(S_{t-1}, A_{t-1}, R_t, \gamma_{t}, S_{t})$ in $\mathcal{H}$ with maximal priority $p_t = \max_{i<t} p_i$
-      \IF{ $t \equiv 0 \mod K$ } 
-	   	\FOR{$j=1$ {\bfseries to} $k$}
-          \STATE Sample transition $j \sim P(j) = p_j^{\alpha} / \sum_i p_i^{\alpha}$
-          \STATE Compute importance-sampling weight $w_j = \left(N\cdot P(j)\right)^{-\beta} / \max_i w_i$
-          \STATE Compute TD-error $\delta_j =  R_j + \gamma_j Q_{\text{target}}\left(S_j, \arg\max_a Q(S_j, a)\right) - Q(S_{j-1}, A_{j-1}) $
-          \STATE Update transition priority $p_j \leftarrow |\delta_j|$ 
-          \STATE Accumulate weight-change $\Delta \leftarrow \Delta + w_j \cdot \delta_j \cdot \nabla_{\theta} Q(S_{j-1}, A_{j-1})$
-        \ENDFOR
-        \STATE Update weights $\theta \leftarrow \theta + \eta \cdot \Delta $, reset $\Delta = 0$
-        \STATE From time to time copy weights into target network $\theta_{\text{target}} \leftarrow \theta$
-      \ENDIF
-      \STATE Choose action $A_t \sim \pi_{\theta}(S_t)$
-   \ENDFOR
-\end{algorithmic}
-\end{algorithm}
 
 ## The Environment
 
@@ -73,20 +38,6 @@ This agent has been trained on a state space that consisted of a vector of 37 fe
 The improvement that could be done, is to actually process directly the pixels of what the agent is seeing first person, which would result in a state-space of 84x84 RGB image. ie a state space of 84x84x3
 
 
-If you prefer, you can do a minimal install of the packaged version directly from PyPI:
 
-After you have successfully completed the project, if you're looking for an additional challenge, you have come to the right place!  In the project, your agent learned from information such as its velocity, along with ray-based perception of objects around its forward direction.  A more challenging task would be to learn directly from pixels!
-
-To solve this harder task, you'll need to download a new Unity environment.  This environment is almost identical to the project environment, where the only difference is that the state is an 84 x 84 RGB image, corresponding to the agent's first-person view.  (**Note**: Udacity students should not submit a project with this new environment.)
-
-You need only select the environment that matches your operating system:
-- Linux: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/VisualBanana_Linux.zip)
-- Mac OSX: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/VisualBanana.app.zip)
-- Windows (32-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/VisualBanana_Windows_x86.zip)
-- Windows (64-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/VisualBanana_Windows_x86_64.zip)
-
-Then, place the file in the `p1_navigation/` folder in the DRLND GitHub repository, and unzip (or decompress) the file.  Next, open `Navigation_Pixels.ipynb` and follow the instructions to learn how to use the Python API to control the agent.
-
-(_For AWS_) If you'd like to train the agent on AWS, you must follow the instructions to [set up X Server](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Training-on-Amazon-Web-Service.md), and then download the environment for the **Linux** operating system above.
 
 

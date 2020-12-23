@@ -13,22 +13,18 @@ class dueling_QNetwork(nn.Module):
             seed (int): Random seed
         """
         super(dueling_QNetwork, self).__init__()
-        self.hidden_fc = nn.Linear(state_size, 64)
-        self.value_fc_hidden = nn.Linear(64,64)
+        self.hidden_fc1 = nn.Linear(state_size, 64)
+        self.hidden_fc2= nn.Linear(64,64)
         self.value_fc = nn.Linear(64, 1)
-        self.advantage_fc_hidden1 = nn.Linear(64,64)
-        self.advantage_fc_hidden2 = nn.Linear(64,64)
         self.advantage_fc = nn.Linear(64, action_size)
 
 
     def forward(self, state):
         """Build a network that maps state -> action values."""
-        x = F.relu(self.hidden_fc(state))
-        value = F.relu(self.value_fc_hidden(x))
-        value = self.value_fc(value)
-        advantage = F.relu(self.advantage_fc_hidden1(x))
-        advantage = F.relu(self.advantage_fc_hidden2(advantage))
-        advantage = self.advantage_fc(advantage)
+        x = F.relu(self.hidden_fc1(state))
+        x = F.relu(self.hidden_fc2(x))
+        value = self.value_fc(x)
+        advantage = self.advantage_fc(x)
         delta_advantage = advantage - advantage.mean()
         expanded_value = value.expand_as(advantage)
         q_out = expanded_value - delta_advantage

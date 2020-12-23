@@ -46,7 +46,7 @@ def parse_params(argv):
                                        "output-image=",
                                        "gamma=",
                                        "tau=",
-                                       "beta_start=",
+                                       "beta-start=",
                                        "beta-decay=",
                                        "alpha=",
                                        "banana_location=",
