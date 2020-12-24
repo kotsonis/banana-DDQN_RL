@@ -4,6 +4,7 @@
 [//]: # (Image References)
 
 [image1]:  (./images/agent_environment.png) "Agent Environment"
+[image2]:  (./images/dueling_q_NN.png) "dueling Q Network"
 # Banana Unity environment solution Report
 
 This project implements a Dueling Double Deep Q Network to learn how to navigate within the environment and collect rewards.
@@ -20,6 +21,8 @@ By learning the value-action pair (Q), our agent can learn the optimal policy wh
 Since we use a replay buffer, we use an offline method for learning Q in steps with a step size alpha, specifically the Q-learning:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{align*}&space;&\underline{Q-Learning}\\&space;&{Q(s_t,a_t)&space;=&space;Q(s_t,a_t)&space;&plus;&space;\alpha(r_{t&plus;1}&plus;\gamma\max_aQ(s_{t&plus;1},a)-Q(s_t,a_t))}\\&space;\end{}" target="_blank"><img src="https://latex.codecogs.com/png.latex?\begin{align*}&space;&\underline{Q-Learning}\\&space;&{Q(s_t,a_t)&space;=&space;Q(s_t,a_t)&space;&plus;&space;\alpha(r_{t&plus;1}&plus;\gamma\max_aQ(s_{t&plus;1},a)-Q(s_t,a_t))}\\&space;\end{}" title="\begin{align*} &\underline{Q-Learning}\\ &{Q(s_t,a_t) = Q(s_t,a_t) + \alpha(r_{t+1}+\gamma\max_aQ(s_{t+1},a)-Q(s_t,a_t))}\\ \end{}" /></a>
+
+
 
 
 
@@ -48,11 +51,13 @@ Basically, we have two Q functions, that have the same network, but with a diffe
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{align*}&space;&{\text{TD-error}&space;=&space;\left[r_{t&plus;1}&plus;&space;\gamma&space;Q(s_{t&plus;1},\arg&space;\max_a&space;Q(s_{t&plus;1},a;\theta)&space;;\theta&space;')&space;\right&space;]-Q(s_t,a_t;\theta))}\\&space;\end{}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{align*}&space;&{\text{TD-error}&space;=&space;\left[r_{t&plus;1}&plus;&space;\gamma&space;Q(s_{t&plus;1},\arg&space;\max_a&space;Q(s_{t&plus;1},a;\theta)&space;;\theta&space;')&space;\right&space;]-Q(s_t,a_t;\theta))}\\&space;\end{}" title="\begin{align*} &{\text{TD-error} = \left[r_{t+1}+ \gamma Q(s_{t+1},\arg \max_a Q(s_{t+1},a;\theta) ;\theta ') \right ]-Q(s_t,a_t;\theta))}\\ \end{}" /></a>
 
+
+
 In order to make sure both networks gain value, we gradually transfer the weights of one network to the other at the end of each learning cycle. The rate of transfer is controlled via hyperparameter `tau` as follows:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\theta&space;\leftarrow&space;\tau\theta&space;&plus;&space;(1-\tau)\theta'" target="_blank"><img src="https://latex.codecogs.com/png.latex?\theta&space;\leftarrow&space;\tau\theta&space;&plus;&space;(1-\tau)\theta'" title="\theta \leftarrow \tau\theta + (1-\tau)\theta'" /></a>
 
-The implementation of the double Q learning can be found in class `DDQNPrioritizedAgent` in [DDQN.py](.\agent\DDQN.py).
+The implementation of the double Q learning can be found in class `DDQNPrioritizedAgent` in [DDQN.py](./agent/DDQN.py).
 
 ### Prioritized Replay Buffer
 This project is an implementation of the [Prioritized Experience Replay,Google DeepMind](https://arxiv.org/pdf/1511.05952.pdf) paper.
@@ -83,7 +88,7 @@ As described above, prioritized replay buffer needs to compute a running sum for
 
 Furthermore, to compute the importance sampling weights, the minimum probability experience needs to be found in the whole buffer, every time a sampling is requested. Again, to avoid having to compute this with O(n^2) a segment tree with a min operation has been used, reducing the time complexity to O(nlogn).
 
-The implementation of the prioritized replay buffer is through class `PrioritizedReplayBuffer` in [buffer.py](.\buffer\ReplayBuffer.py).
+The implementation of the prioritized replay buffer is through class `PrioritizedReplayBuffer` in [buffer.py](./buffer/ReplayBuffer.py).
 
 # Complete Algorithm
 
@@ -135,6 +140,7 @@ With the above parameters, the agent was able to solve the game (average reward 
 
 Below is the reward per episode (moving average of 10 episodes) for this agent.
 
+![training_log](./images/training_output.png)
 
 ## Ideas for future work
 This agent has been trained on a state space that consisted of a vector of 37 features.
