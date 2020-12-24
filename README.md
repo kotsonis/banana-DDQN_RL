@@ -82,3 +82,6 @@ You can also specify the number of episodes you want the agent to play, as well 
 ```bash
 python play.py --episodes 20 --model v2_model.pt
 ```
+
+## Implementation and results
+You can read about the implementation details and the results obtained in [Report.md](report.md)
