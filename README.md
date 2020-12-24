@@ -84,4 +84,4 @@ python play.py --episodes 20 --model v2_model.pt
 ```
 
 ## Implementation and results
-You can read about the implementation details and the results obtained in [Report.md](report.md)
+You can read about the implementation details and the results obtained in [Report.md](Report.md)
